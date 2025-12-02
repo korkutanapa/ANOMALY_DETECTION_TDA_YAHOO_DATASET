@@ -101,5 +101,44 @@ This indicates that **Area Under the Curve (AUC)** based topological features an
 2.  **Visualization:** Use the interactive plotting cell provided. Select `ts11` or `ts78` (which show detected changepoints in the logs) to visually inspect how the `h0_auc_over_l2` score spikes exactly where the anomaly occurs.
 3.  **Tolerance (NTOL):** Your code uses `NTOL=3`. Ensure this aligns with your business use case. If you need exact timestamp precision, set `NTOL=0` (though F1 scores will drop significantly).
 
-**Next Step:** Would you like me to extract the specific mathematical formula used for the `_auc_tri_max` (Triangular Landscape AUC) function to include in your report?
 
+Based on the code provided in the A4 notebook, we can analyze the configuration and expected results for the Yahoo A4 dataset (Real Web Traffic), specifically focusing on how the **Extreme Value Theory (EVT)** parameters were tuned compared to the A3 (Synthetic) benchmark.
+
+Although the explicit output tables for A4 were not visible in the file snippet, the code configuration reveals significant analytical insights into the nature of the A4 dataset.
+
+### 1. Analysis of EVT Parameter Tuning (A3 vs. A4)
+
+The most telling difference lies in how the **VAAD (Velocity Acceleration Anomaly Detection)** algorithm was tuned for the A4 dataset compared to the previous A3 analysis.
+
+| Parameter | A3 (Synthetic) | A4 (Real Traffic) | Analysis |
+| :--- | :--- | :--- | :--- |
+| **Gate Quantile** | `0.87` (87th %) | `0.78` (78th %) | **Significant Drop.** A4 required a much lower "gate" to collect enough tail samples. This indicates the A4 dataset is **noisier**. Real web traffic has high variance in "normal" behavior, so the algorithm needs a broader sample of "high" values to accurately model the statistical tail (GPD fit). |
+| **Final Quantile** | `0.995` | `0.993` | **More Aggressive.** The threshold for flagging an anomaly was lowered slightly (99.5% $\to$ 99.3%). This suggests anomalies in A4 are **less distinct** from normal data than in A3. Synthetic anomalies are often obvious spikes; real anomalies (like server timeouts or traffic dips) can be subtler, requiring a more sensitive trigger. |
+
+### 2. Topological Feature Performance (Expected Behavior)
+
+The A4 dataset consists of real web traffic, which typically includes **seasonality** (daily/weekly cycles) and **point anomalies** (spikes/drops). Based on the TDA features extracted, we can infer which "shapes" define the anomalies:
+
+* **Bottleneck Distance (`anomalyscore_bottleneck`):**
+    * **Function:** Measures the single largest "gap" or "loop" in the data topology.
+    * **A4 Analysis:** This is likely the **top performer**. In web traffic, a sudden spike (DDoS or viral event) or drop (server crash) creates a massive, short-lived topological loop. The Bottleneck distance captures exactly this "max amplitude" deviation, ignoring smaller noise.
+
+* **AUC over L2 (`anomalyscore_h0_auc_over_l2`):**
+    * **Function:** Measures the "total area" of topological activity relative to the signal energy.
+    * **A4 Analysis:** This feature is robust against baseline shifts. Since web traffic fluctuates day-to-night, the raw energy ($L2$) changes. By normalizing the topological signal (AUC) by the energy ($L2$), this feature detects anomalies regardless of whether they happen during peak traffic (day) or low traffic (night).
+
+### 3. Change Point Detection (Segmentation)
+
+The code re-runs **PELT** segmentation on A4.
+* **A4 Context:** Unlike A3, A4 data often shifts behavior drastically (e.g., a website goes from "growth phase" to "stable phase").
+* **Impact:** The TDA scoring resets at each segment. This is crucial for A4. Without segmentation, a "busy week" would look like one giant anomaly compared to a "quiet week." The segmentation ensures the model adapts to the **current** traffic baseline.
+
+### 4. Summary of Results Structure
+
+The notebook implements a **Grid Search** for A4 (Cell 17) to optimize the EVT thresholds.
+* **Search Space:** It tested Gate Quantiles from `0.60` to `0.90` and Final Quantiles from `0.980` to `0.997`.
+* **Selection Criterion:** The model selects the parameters maximizing the **F1 Score**.
+* **Result Interpretation:** If the best F1 score comes from a **low Gate Quantile (e.g., 0.75-0.80)**, it confirms that A4 is "heavy-tailed"—meaning "extreme" events are relatively common, and distinguishing true anomalies requires modeling that heavy tail carefully.
+
+**Next Step:**
+To provide the precise F1 scores for A4, please copy and paste the **"FINAL PERFORMANCE SUMMARY"** table output from the notebook. I can then compare the exact accuracy of the TDA method on real data (A4) versus the synthetic benchmark (A3).
