@@ -25,7 +25,7 @@ This is the mathematical engine of the pipeline. It converts a 1D time series in
 * **Takens' Embedding:**
     The code converts a sliding window of the time series into a "point cloud" in $d$-dimensional space.
   
-    ($\vec{v}_t = [x_t, x_{t-\tau}, x_{t-2\tau}, \dots, x_{t-(d-1)\tau}]$)
+    $\vec{v}_t = [x_t, x_{t-\tau}, x_{t-2\tau}, \dots, x_{t-(d-1)\tau}]$
   
     * **Parameters:** Window ($W=14$), Dimension ($d=7$), Time Delay ($\tau=1$).
     * **Result:** A small cloud of points representing the dynamics of that window.
