@@ -1,0 +1,30 @@
+# 📉 Time Series Experiment No. 1: The Phase Shock
+
+## 🎯 Experiment Objective
+To investigate the impact of a sudden **Phase Shift (180° / $\pi$ radians)** on a stable periodic signal. This simulates a "system reset" or "timing error" in a continuous process (e.g., a skipped heartbeat or a sensor desynchronization).
+
+## 📊 Visualization
+Below is the time-evolution of the signal. The red dashed line marks the moment of intervention ($t=300$).
+
+<div align="center">
+  <img src="experiment1.png" alt="Evolution of the signal from Control (Blue) to Experiment (Red)" width="100%">
+  <p><em>Figure 1: Evolution of the signal from Control (Blue) to Experiment (Red).</em></p>
+</div>
+
+---
+
+## 📝 Analysis & Findings
+
+### 1. The Control Phase ($t=[0, 300]$)
+* **State:** Stable Equilibrium
+* **Parameters:** $\text{Amplitude}=5$, $\text{Period}=10$, $\text{Phase}=0$
+* **Observation:** The system exhibits a predictable sinusoidal behavior with regular peaks and valleys. The noise ($\sigma=0.5$) adds realistic jitter but does not obscure the pattern.
+
+### 2. The Intervention ($t=300$)
+At point 300, we inject a **Phase Shock** of $\pi$ radians.
+* **Mathematical Change:** $\sin(\omega t) \rightarrow \sin(\omega t + \pi)$
+* **Effect:** Since $\sin(x + \pi) = -\sin(x)$, the wave instantly flips its sign.
+
+### 3. The Experimental Phase ($t=[300, 400]$)
+* **Observation:** Immediately after the vertical black dashed line, observe the **"Broken Rhythm"**.
+* **Detail:** At $t=300$, the wave *should* have continued upward to a peak. Instead, the phase shift forces it downward into a valley. This creates a sharp "kink" or discontinuity in the waveform, clearly visible in the visualization.
